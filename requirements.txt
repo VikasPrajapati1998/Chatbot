@@ -22,3 +22,7 @@ beautifulsoup4
 markdown
 plotly
 pandas
+
+# Web Search
+duckduckgo-search
+ddgs
