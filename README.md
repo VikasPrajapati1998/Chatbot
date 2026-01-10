@@ -48,8 +48,8 @@ A powerful, feature-rich AI chatbot built with Streamlit and LangChain that supp
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
-- 4GB+ RAM (8GB+ recommended for heavy models)
+- Python 3.11 or higher
+- 8GB+ RAM (16GB+ recommended for heavy models)
 - Internet connection (for initial model downloads)
 
 ### Installation
@@ -57,7 +57,7 @@ A powerful, feature-rich AI chatbot built with Streamlit and LangChain that supp
 #### Windows (PowerShell)
 ```powershell
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/VikasPrajapati1998/Chatbot.git
 cd universal-chatbot
 
 # Run setup script (installs everything)
@@ -70,7 +70,7 @@ cd universal-chatbot
 #### Linux/Mac (Bash)
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/VikasPrajapati1998/Chatbot.git
 cd universal-chatbot
 
 # Make scripts executable

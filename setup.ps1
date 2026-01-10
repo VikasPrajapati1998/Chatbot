@@ -3,7 +3,7 @@
 # ============================================
 
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Universal Chatbot - Setup Script" -ForegroundColor Cyan
+Write-Host "  Universal Chatbot - Setup Script (Windows)" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -13,7 +13,8 @@ try {
     $pythonVersion = python --version 2>&1
     Write-Host "✓ Python found: $pythonVersion" -ForegroundColor Green
 } catch {
-    Write-Host "✗ Python not found! Please install Python 3.8+ from https://www.python.org/" -ForegroundColor Red
+    Write-Host "✗ Python not found!" -ForegroundColor Red
+    Write-Host "Please install Python 3.8+ from https://www.python.org/" -ForegroundColor Yellow
     exit 1
 }
 
@@ -33,75 +34,62 @@ Write-Host "[3/6] Activating virtual environment..." -ForegroundColor Yellow
 & ".\venv\Scripts\Activate.ps1"
 Write-Host "✓ Virtual environment activated" -ForegroundColor Green
 
-# Install Python dependencies
+# Upgrade pip & install dependencies
 Write-Host ""
-Write-Host "[4/6] Installing Python packages..." -ForegroundColor Yellow
+Write-Host "[4/6] Installing/upgrading Python packages..." -ForegroundColor Yellow
 pip install --upgrade pip
 pip install -r requirements.txt
-Write-Host "✓ Python packages installed" -ForegroundColor Green
+Write-Host "✓ All Python packages installed" -ForegroundColor Green
 
-# Check if Ollama is installed
+# Check Ollama
 Write-Host ""
 Write-Host "[5/6] Checking Ollama installation..." -ForegroundColor Yellow
 try {
     $ollamaVersion = ollama --version 2>&1
     Write-Host "✓ Ollama found: $ollamaVersion" -ForegroundColor Green
     
-    # Pull required models
     Write-Host ""
-    Write-Host "Pulling AI models (this may take a while)..." -ForegroundColor Yellow
+    Write-Host "Pulling recommended models (may take some time)..." -ForegroundColor Yellow
     
-    Write-Host "  → Pulling qwen2.5:0.5b..." -ForegroundColor Cyan
-    ollama pull qwen2.5:0.5b
+    $models = @("qwen2.5:0.5b", "llama3.2:1b", "llama3.1:8b")
     
-    Write-Host "  → Pulling llama3.2:1b..." -ForegroundColor Cyan
-    ollama pull llama3.2:1b
-    
-    Write-Host "  → Pulling llama3.1:8b..." -ForegroundColor Cyan
-    ollama pull llama3.1:8b
-    
-    Write-Host "✓ All models downloaded" -ForegroundColor Green
-    
-} catch {
-    Write-Host "✗ Ollama not found!" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Please install Ollama:" -ForegroundColor Yellow
-    Write-Host "  1. Visit: https://ollama.ai/download" -ForegroundColor White
-    Write-Host "  2. Download and install Ollama for Windows" -ForegroundColor White
-    Write-Host "  3. Run this script again" -ForegroundColor White
-    Write-Host ""
-    
-    $install = Read-Host "Do you want to open Ollama download page? (Y/N)"
-    if ($install -eq "Y" -or $install -eq "y") {
-        Start-Process "https://ollama.ai/download"
+    foreach ($model in $models) {
+        Write-Host "  → Pulling $model ..." -ForegroundColor Cyan
+        ollama pull $model
     }
     
+    Write-Host "✓ All models pulled successfully" -ForegroundColor Green
+}
+catch {
+    Write-Host "✗ Ollama not found!" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Please install Ollama first:" -ForegroundColor Yellow
+    Write-Host "  1. Go to: https://ollama.com/download" -ForegroundColor White
+    Write-Host "  2. Download & install for Windows" -ForegroundColor White
+    Write-Host "  3. Run this script again" -ForegroundColor White
+    
+    $answer = Read-Host "Open Ollama download page now? (Y/N)"
+    if ($answer -eq "Y" -or $answer -eq "y") {
+        Start-Process "https://ollama.com/download"
+    }
     exit 1
 }
 
-# Setup complete
+# Final message
 Write-Host ""
-Write-Host "[6/6] Setup complete!" -ForegroundColor Green
+Write-Host "[6/6] Setup finished successfully!" -ForegroundColor Green
 Write-Host ""
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Setup Successful!" -ForegroundColor Cyan
-Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "To start the chatbot you can now run:" -ForegroundColor Yellow
+Write-Host "   .\run.ps1" -ForegroundColor White
 Write-Host ""
-Write-Host "To start the chatbot:" -ForegroundColor Yellow
-Write-Host "  1. Make sure Ollama is running (it should auto-start)" -ForegroundColor White
-Write-Host "  2. Run: streamlit run frontend.py" -ForegroundColor White
-Write-Host ""
-Write-Host "Or use the run script:" -ForegroundColor Yellow
-Write-Host "  .\run.ps1" -ForegroundColor White
+Write-Host "or directly:" -ForegroundColor Yellow
+Write-Host "   streamlit run frontend.py" -ForegroundColor White
 Write-Host ""
 
-# Ask if user wants to start the chatbot now
-$start = Read-Host "Do you want to start the chatbot now? (Y/N)"
-if ($start -eq "Y" -or $start -eq "y") {
+$startNow = Read-Host "Would you like to start the chatbot now? (Y/N)"
+if ($startNow -eq "Y" -or $startNow -eq "y") {
     Write-Host ""
-    Write-Host "Starting chatbot..." -ForegroundColor Green
-    Write-Host "Press Ctrl+C to stop the server" -ForegroundColor Yellow
-    Write-Host ""
+    Write-Host "Launching chatbot... (Ctrl+C to stop)" -ForegroundColor Green
     streamlit run frontend.py
 }
 
