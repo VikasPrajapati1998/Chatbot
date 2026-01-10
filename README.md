@@ -2,7 +2,7 @@
 
 A powerful, feature-rich AI chatbot built with Streamlit and LangChain that supports multiple AI models, file uploads, and persistent chat history. Think ChatGPT meets Claude, but running locally on your machine!
 
-![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
