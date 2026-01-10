@@ -6,6 +6,7 @@ langchain-community
 langchain-core
 langchain-ollama
 langgraph
+langgraph-checkpoint-sqlite
 
 # Database
 db-sqlite3
