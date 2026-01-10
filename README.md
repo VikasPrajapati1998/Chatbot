@@ -397,45 +397,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/universal-chatbot/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/universal-chatbot/discussions)
-- **Email**: your.email@example.com
-
----
-
-## ⭐ Star History
-
-If you find this project useful, please consider giving it a star! ⭐
-
----
-
-## 📸 Screenshots
-
-### Main Chat Interface
-```
-[Screenshot of main chat interface]
-```
-
-### Chat History Sidebar
-```
-[Screenshot of sidebar with chat history]
-```
-
-### File Upload Feature
-```
-[Screenshot of file upload and preview]
-```
-
-### Statistics Dashboard
-```
-[Screenshot of statistics view]
-```
+- **Issues**: [GitHub Issues](https://github.com/VikasPrajapati1998/Chatbot/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/VikasPrajapati1998/Chatbot)
+- **Email**: vp191198@gmail.com
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [Your Name]**
+**Made with ❤️ by Vikas Prajapati**
 
 [⬆ Back to Top](#-universal-file-chatbot)
 
