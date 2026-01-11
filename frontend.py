@@ -3,7 +3,7 @@ from backend import run_chat_stream, MODELS, get_model_emoji
 from database import (
     save_chat_metadata, save_chat_message, get_all_chats,
     get_chat_messages, get_chat_metadata, delete_chat, clear_all_chats,
-    generate_chat_title, format_timestamp, get_database_stats
+    generate_chat_title, format_timestamp, get_database_stats, rename_chat
 )
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 import uuid
@@ -46,6 +46,10 @@ if "confirm_clear" not in st.session_state:
     st.session_state.confirm_clear = False
 if "show_stats" not in st.session_state:
     st.session_state.show_stats = False
+if "rename_mode" not in st.session_state:
+    st.session_state.rename_mode = False
+if "temp_title" not in st.session_state:
+    st.session_state.temp_title = ""
 
 def extract_file_content(uploaded_file):
     filename = uploaded_file.name
@@ -88,6 +92,7 @@ with st.sidebar:
             st.session_state.file_injected = False
             st.session_state.chat_title = "New Chat"
             st.session_state.confirm_clear = False
+            st.session_state.rename_mode = False
             st.rerun()
     with col2:
         if st.button("📊 Stats", use_container_width=True):
@@ -115,6 +120,7 @@ with st.sidebar:
             st.session_state.file_injected = False
             st.session_state.chat_title = "New Chat"
             st.session_state.confirm_clear = False
+            st.session_state.rename_mode = False
             st.success("✅ All history cleared!")
             st.rerun()
         else:
@@ -139,7 +145,7 @@ with st.sidebar:
         for chat in all_chats:
             is_current = chat['chat_id'] == st.session_state.chat_id
             with st.container():
-                col1, col2 = st.columns([5, 1])
+                col1, col2, col3 = st.columns([4, 1, 1])
                 with col1:
                     model_emoji = get_model_emoji(chat['model'])
                     file_indicator = " 📎" if chat['file_name'] else ""
@@ -150,9 +156,17 @@ with st.sidebar:
                         st.session_state.file_context = ""
                         st.session_state.file_injected = False
                         st.session_state.confirm_clear = False
+                        st.session_state.rename_mode = False
                         st.rerun()
-                    st.caption(f"💬 {chat['message_count']} msgs | 🕒 {format_timestamp(chat['last_updated'])}")
+                    st.caption(f"💬 {chat['message_count']} msgs | 🕐 {format_timestamp(chat['last_updated'])}")
                 with col2:
+                    if st.button("✏️", key=f"rename_{chat['chat_id']}", help="Rename"):
+                        st.session_state.chat_id = chat['chat_id']
+                        load_chat_history(chat['chat_id'])
+                        st.session_state.rename_mode = True
+                        st.session_state.temp_title = chat['title']
+                        st.rerun()
+                with col3:
                     if st.button("🗑️", key=f"del_{chat['chat_id']}", help="Delete"):
                         delete_chat(chat['chat_id'])
                         if chat['chat_id'] == st.session_state.chat_id:
@@ -160,6 +174,7 @@ with st.sidebar:
                             st.session_state.history = []
                             st.session_state.chat_title = "New Chat"
                             st.session_state.file_name = None
+                            st.session_state.rename_mode = False
                         st.rerun()
                 st.divider()
     else:
@@ -169,7 +184,35 @@ with st.sidebar:
 col1, col2, col3 = st.columns([3, 1, 1])
 with col1:
     st.title("🤖 Universal File Chatbot")
-    st.caption(f"📝 {st.session_state.chat_title}")
+    
+    # Rename mode
+    if st.session_state.rename_mode:
+        st.markdown("### ✏️ Rename Chat")
+        col_input, col_save, col_cancel = st.columns([3, 1, 1])
+        with col_input:
+            new_title = st.text_input(
+                "New chat name",
+                value=st.session_state.temp_title,
+                key="rename_input",
+                placeholder="Enter new chat name..."
+            )
+        with col_save:
+            if st.button("💾 Save", use_container_width=True, type="primary"):
+                if new_title and new_title.strip():
+                    rename_chat(st.session_state.chat_id, new_title.strip())
+                    st.session_state.chat_title = new_title.strip()
+                    st.session_state.rename_mode = False
+                    st.success("✅ Chat renamed!")
+                    st.rerun()
+                else:
+                    st.warning("⚠️ Please enter a valid name")
+        with col_cancel:
+            if st.button("❌ Cancel", use_container_width=True):
+                st.session_state.rename_mode = False
+                st.rerun()
+    else:
+        st.caption(f"📝 {st.session_state.chat_title}")
+
 with col2:
     model_emoji = get_model_emoji(st.session_state.selected_model)
     st.metric("Model", f"{model_emoji}")
@@ -188,9 +231,14 @@ with chat_container:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
             if msg["role"] == "assistant":
-                if st.button("📋 Copy", key=f"copy_{i}"):
-                    st.code(msg["content"], language=None)
-                    st.success("✅ Copied to display! Use Ctrl+C to copy from the code block above.")
+                col_copy, col_search = st.columns([1, 4])
+                with col_copy:
+                    if st.button("📋 Copy", key=f"copy_{i}"):
+                        st.code(msg["content"], language=None)
+                        st.success("✅ Copied to display! Use Ctrl+C to copy from the code block above.")
+                if msg.get("search_used", False):
+                    with col_search:
+                        st.caption("🔍 Web search used")
 
 # CONTROLS
 st.divider()
@@ -230,7 +278,6 @@ if st.session_state.file_context:
 st.divider()
 
 # INPUT
-
 user_input = st.chat_input("💬 Type your message here...")
 
 if user_input:
@@ -238,6 +285,7 @@ if user_input:
         st.session_state.chat_title = generate_chat_title(user_input)
     st.session_state.history.append({"role": "user", "content": user_input, "search_used": False})
     save_chat_message(st.session_state.chat_id, "user", user_input, False)
+    st.session_state.rename_mode = False  # Exit rename mode when sending a message
     st.rerun()
 
 # PROCESS RESPONSE
@@ -272,6 +320,8 @@ if st.session_state.history and st.session_state.history[-1]["role"] == "user":
                         message_placeholder.markdown(full_response + "▋")
             
             message_placeholder.markdown(full_response)
+            if search_used:
+                st.caption("🔍 Web search used")
             st.session_state.generating = False
         
         st.session_state.history.append({"role": "assistant", "content": full_response, "search_used": search_used})

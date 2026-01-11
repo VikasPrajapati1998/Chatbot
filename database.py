@@ -149,6 +149,17 @@ def delete_chat(chat_id: str):
     conn.commit()
     cursor.close()
 
+def rename_chat(chat_id: str, new_title: str):
+    """Rename a specific chat."""
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE chat_history 
+        SET title = ?, last_updated = CURRENT_TIMESTAMP
+        WHERE chat_id = ?
+    """, (new_title, chat_id))
+    conn.commit()
+    cursor.close()
+
 def clear_all_chats():
     """Clear all chat history and checkpoint data."""
     cursor = conn.cursor()
@@ -223,3 +234,4 @@ def generate_chat_title(first_message: str) -> str:
 def get_db_connection():
     """Get database connection for checkpointer."""
     return conn
+
